@@ -62,8 +62,7 @@ script:
   - mkdir /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
   - mkdir /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
   - cd ../R-pkg/
-  - touch pkg.txt && Rscript pkg.R
-  - mv pkg.txt /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
+  - Rscript pkg2.R
   - tar -I zstd -cf pkg.tar.zst /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
 deploy:
   provider: releases
