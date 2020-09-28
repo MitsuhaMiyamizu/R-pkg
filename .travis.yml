@@ -63,11 +63,6 @@ script:
   - touch pkg.txt && Rscript pkg.R
   - mv pkg.txt /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
   - zip -q -r pkg.zip /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
-# - Rscript R-benchmark.R
-# - Rscript dgemm.R
-# - Rscript parallel.R
-# - Rscript multitest.R
-# - cat bench-25.R | time R --slave --no-save
 deploy:
   provider: releases
   token: ${pkg_key}
