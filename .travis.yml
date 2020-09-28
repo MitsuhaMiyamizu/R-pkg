@@ -21,6 +21,8 @@ addons:
       - libxmu-dev
       - libxt-dev
       - libreadline-dev
+      - zstd
+
 script:
   - sudo apt -qq build-dep r-base -y
   - wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
@@ -52,8 +54,8 @@ script:
   - export LD="xild"
   - export LD_LIBRARY_PATH=/home/travis/build/MitsuhaMiyamizu/R-MKL/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
   - source /home/travis/build/MitsuhaMiyamizu/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
-  - wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2_icc_ifort_mkl_xenial/R-4.0.2.tar.gz" -q
-  - tar xf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
+  - wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2_icc_ifort_mkl_xenial/R-4.0.2.tar.zst" -q
+  - tar -I zstd -xf R-4.0.2.tar.zst && rm R-4.0.2.tar.zst
   - cd R-4.0.2/
   - sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
   - cd ..
@@ -62,12 +64,12 @@ script:
   - cd ../R-pkg/
   - touch pkg.txt && Rscript pkg.R
   - mv pkg.txt /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
-  - zip -q -r pkg.zip /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
+  - tar -I zstd -cf pkg.tar.zst /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
 deploy:
   provider: releases
   token: ${pkg_key}
   skip_cleanup: true
-  file: pkg.zip
+  file: pkg.tar.zst
   overwrite: true
   on:
     tags: true
