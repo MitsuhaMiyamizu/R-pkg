@@ -36,7 +36,26 @@ jobs:
           sudo apt-get -qq install intel-mkl-2020.3-111 -y
       - name: Prepare R source tarball
         run: |
-          bash /home/runner/work/R-pkg/R-pkg/env.sh
+          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
+          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
+          source /opt/intel/mkl/bin/mklvars.sh intel64
+          export _intel_arch=intel64
+          export _intel_lib=mkl_intel_lp64
+          export MKL="-L${MKLROOT}/lib/intel64 -Wl,--as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
+          export _gcc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
+          export LDFLAGS="-qopenmp"
+          export CFLAGS="${_gcc_opt}"
+          export CXXFLAGS="${_gcc_opt}"
+          export FFLAGS="${_gcc_opt}"
+          export FCFLAGS="${_gcc_opt}"
+          export CC="icc"
+          export CXX="icpc"
+          export F77="ifort"
+          export FC="ifort"
+          export AR="xiar"
+          export LD="xild"
+          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
+          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/
           wget "https://cran.r-project.org/src/base/R-4/R-4.0.2.tar.gz" -q
           tar zxf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
@@ -44,20 +63,62 @@ jobs:
           ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc/R --datarootdir=/usr/share rsharedir=/usr/share/R/ rincludedir=/usr/include/R/ rdocdir=/usr/share/doc/R/ --with-x --enable-R-shlib --with-blas="$MKL" --with-lapack --disable-R-profiling --with-tcltk
       - name: Compile R
         run: |
-          bash /home/runner/work/R-pkg/R-pkg/env.sh
+          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
+          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
+          source /opt/intel/mkl/bin/mklvars.sh intel64
+          export _intel_arch=intel64
+          export _intel_lib=mkl_intel_lp64
+          export MKL="-L${MKLROOT}/lib/intel64 -Wl,--as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
+          export _gcc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
+          export LDFLAGS="-qopenmp"
+          export CFLAGS="${_gcc_opt}"
+          export CXXFLAGS="${_gcc_opt}"
+          export FFLAGS="${_gcc_opt}"
+          export FCFLAGS="${_gcc_opt}"
+          export CC="icc"
+          export CXX="icpc"
+          export F77="ifort"
+          export FC="ifort"
+          export AR="xiar"
+          export LD="xild"
+          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
+          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
+          cd /home/runner/work/R-pkg/ && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
       - name: Install & Benchmark
         run: |
-          bash /home/runner/work/R-pkg/R-pkg/env.sh
+          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
+          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
+          source /opt/intel/mkl/bin/mklvars.sh intel64
+          export _intel_arch=intel64
+          export _intel_lib=mkl_intel_lp64
+          export MKL="-L${MKLROOT}/lib/intel64 -Wl,--as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
+          export _gcc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
+          export LDFLAGS="-qopenmp"
+          export CFLAGS="${_gcc_opt}"
+          export CXXFLAGS="${_gcc_opt}"
+          export FFLAGS="${_gcc_opt}"
+          export FCFLAGS="${_gcc_opt}"
+          export CC="icc"
+          export CXX="icpc"
+          export F77="ifort"
+          export FC="ifort"
+          export AR="xiar"
+          export LD="xild"
+          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
+          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-4.0.2/
-          cd .. && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
-          cd R-4.0.2/
+          mkdir /home/runner/work/R-pkg/R/
+          mkdir /home/runner/work/R-pkg/R/library/
+          cd /home/runner/work/R-pkg/R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
-          cd ../R-pkg/
+          cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
+          cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
           Rscript R-benchmark.R
           Rscript dgemm.R
           Rscript parallel.R
           Rscript multitest.R
           cat bench-25.R | time R --slave --no-save
+          ls -al /home/runner/work/R-pkg/
