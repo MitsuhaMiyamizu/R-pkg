@@ -34,42 +34,22 @@ jobs:
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install intel-mkl-2020.0-088 -y
-      - name: Download and setup compile environment
-        run: |
-          cd /home/runner/work/R-pkg/
-          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
-          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
-          source /opt/intel/mkl/bin/mklvars.sh intel64
-          export _intel_arch=intel64
-          export _intel_lib=mkl_intel_lp64
-          export MKL="-L${MKLROOT}/lib/intel64 -Wl,--as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
-          export _gcc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
-          export LDFLAGS="-qopenmp"
-          export CFLAGS="${_gcc_opt}"
-          export CXXFLAGS="${_gcc_opt}"
-          export FFLAGS="${_gcc_opt}"
-          export FCFLAGS="${_gcc_opt}"
-          export CC="icc"
-          export CXX="icpc"
-          export F77="ifort"
-          export FC="ifort"
-          export AR="xiar"
-          export LD="xild"
-          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
-          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
       - name: Prepare R source tarball
         run: |
           cd /home/runner/work/R-pkg/
+          bash ./env.sh
           wget "https://cran.r-project.org/src/base/R-4/R-4.0.2.tar.gz" -q
           tar zxf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
           cd R-4.0.2/
           ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc/R --datarootdir=/usr/share rsharedir=/usr/share/R/ rincludedir=/usr/include/R/ rdocdir=/usr/share/doc/R/ --with-x --enable-R-shlib --with-blas="$MKL" --with-lapack --disable-R-profiling --with-tcltk
       - name: Compile R
         run: |
+          bash ./env.sh
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
       - name: Install & Benchmark
         run: |
+          bash ./env.sh
           cd /home/runner/work/R-pkg/R-4.0.2/
           cd .. && tar cvf R-4.0.2.tar.gz R-4.0.2/
           cd R-4.0.2/
