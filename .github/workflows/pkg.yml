@@ -116,6 +116,7 @@ jobs:
           cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
           cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
+          cd /home/runner/work/R-pkg/R-pkg/
           Rscript R-benchmark.R
           Rscript dgemm.R
           Rscript parallel.R
