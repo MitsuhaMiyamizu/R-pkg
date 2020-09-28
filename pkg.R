@@ -1,6 +1,5 @@
-.libPaths('/home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/')
+.libPaths('/home/runner/work/R-pkg/R/library/')
 repos <- 'https://cloud.r-project.org/'
-sink("pkg.txt")
 install.packages("foreach", repos = repos)
 install.packages("doParallel", repos = repos)
 install.packages("SuppDists", repos = repos)
@@ -26,4 +25,3 @@ install.packages("NMF", repos = repos)
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager", repos = repos)
 BiocManager::install("clusterProfiler")
-sink()
