@@ -37,7 +37,7 @@ jobs:
       - name: Download and setup compile environment
         run: |
           cd /home/runner/work/R-pkg/
-          export PATH/home/runner/work/R-pkg/intel/bin/:$PATH
+          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
           export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
           source /opt/intel/mkl/bin/mklvars.sh intel64
           export _intel_arch=intel64
