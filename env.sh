@@ -1,4 +1,3 @@
-cd /home/runner/work/R-pkg/
 export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
 export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
 source /opt/intel/mkl/bin/mklvars.sh intel64
