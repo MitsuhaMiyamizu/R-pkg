@@ -33,27 +33,28 @@ jobs:
       - name: Install intel mkl library
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install intel-mkl-2020.0-088 -y
+          sudo apt-get -qq install intel-mkl-2020.3-111 -y
       - name: Prepare R source tarball
         run: |
+          bash /home/runner/work/R-pkg/R-pkg/env.sh
           cd /home/runner/work/R-pkg/
-          bash ./env.sh
           wget "https://cran.r-project.org/src/base/R-4/R-4.0.2.tar.gz" -q
           tar zxf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
           cd R-4.0.2/
           ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc/R --datarootdir=/usr/share rsharedir=/usr/share/R/ rincludedir=/usr/include/R/ rdocdir=/usr/share/doc/R/ --with-x --enable-R-shlib --with-blas="$MKL" --with-lapack --disable-R-profiling --with-tcltk
       - name: Compile R
         run: |
-          bash ./env.sh
+          bash /home/runner/work/R-pkg/R-pkg/env.sh
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
       - name: Install & Benchmark
         run: |
-          bash ./env.sh
+          bash /home/runner/work/R-pkg/R-pkg/env.sh
           cd /home/runner/work/R-pkg/R-4.0.2/
-          cd .. && tar cvf R-4.0.2.tar.gz R-4.0.2/
+          cd .. && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
           cd R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
+          cd ../R-pkg/
           Rscript pkg.R
           Rscript R-benchmark.R
           Rscript dgemm.R
