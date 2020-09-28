@@ -1,0 +1,80 @@
+branches:
+  only:
+    - /[0-9]*.0/
+language: c
+arch: amd64
+os: linux
+dist: xenial
+addons:
+  apt:
+    packages:
+      - subversion 
+      - ccache 
+      - texlive 
+      - texlive-fonts-extra 
+      - texlive-latex-extra
+      - libx11-dev
+      - libpcre2-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libtiff-dev
+      - libxmu-dev
+      - libxt-dev
+      - libreadline-dev
+script:
+  - sudo apt -qq build-dep r-base -y
+  - wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+  - sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+  - sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
+  - sudo apt -qq update
+  - sudo apt -qq install intel-mkl-2020.0-088
+  - mkdir ../R-MKL/ && cd ../R-MKL/
+  - wget "${ICCDL}" -q
+  - tar xzf intel.tar.gz && rm intel.tar.gz
+  - du -hc ./intel | sort -rh | head -10
+  - export PATH=/home/travis/build/MitsuhaMiyamizu/R-MKL/intel/bin/:$PATH
+  - export INTEL_LICENSE_FILE=/home/travis/build/MitsuhaMiyamizu/R-MKL/intel/
+  - source /opt/intel/mkl/bin/mklvars.sh intel64
+  - export _intel_arch=intel64
+  - export _intel_lib=mkl_intel_lp64
+  - export MKL="-L${MKLROOT}/lib/intel64 -Wl,--as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
+  - export _gcc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
+  - export LDFLAGS="-qopenmp"
+  - export CFLAGS="${_gcc_opt}"
+  - export CXXFLAGS="${_gcc_opt}"
+  - export FFLAGS="${_gcc_opt}"
+  - export FCFLAGS="${_gcc_opt}"
+  - export CC="icc"
+  - export CXX="icpc"
+  - export F77="ifort"
+  - export FC="ifort"
+  - export AR="xiar"
+  - export LD="xild"
+  - export LD_LIBRARY_PATH=/home/travis/build/MitsuhaMiyamizu/R-MKL/intel/compilers_and_libraries_2020.2.254/linux/compiler/lib/intel64_lin/
+  - source /home/travis/build/MitsuhaMiyamizu/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
+  - wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2_icc_ifort_mkl_xenial/R-4.0.2.tar.gz" -q
+  - tar xf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
+  - cd R-4.0.2/
+  - sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
+  - cd ..
+  - mkdir /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
+  - mkdir /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
+  - cd ../R-pkg/
+  - touch pkg.txt && Rscript pkg.R
+  - mv pkg.txt /home/travis/build/MitsuhaMiyamizu/R-MKL/R/library/
+  - zip -q -r pkg.zip /home/travis/build/MitsuhaMiyamizu/R-MKL/R/
+# - Rscript R-benchmark.R
+# - Rscript dgemm.R
+# - Rscript parallel.R
+# - Rscript multitest.R
+# - cat bench-25.R | time R --slave --no-save
+deploy:
+  provider: releases
+  token: ${pkg_key}
+  skip_cleanup: true
+  file: pkg.zip
+  overwrite: true
+  on:
+    tags: true
+    all_branches: true
+    repo: MitsuhaMiyamizu/R-pkg
