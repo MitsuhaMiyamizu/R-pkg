@@ -127,8 +127,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 1.0
-          release_name: Packages built for Ubuntu Bionic
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }} Packages built for Ubuntu Bionic
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -140,4 +140,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: /home/runner/work/R-pkg/R-pkg/
           asset_name: R-4.0.2.tar.zst
-          #asset_content_type: application/
+          asset_content_type: application/x-tar
