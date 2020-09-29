@@ -138,6 +138,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: /home/runner/work/R-pkg/R-pkg/
+          asset_path: /home/runner/work/R-pkg/R-pkg/R-4.0.2.tar.zst
           asset_name: R-4.0.2.tar.zst
           asset_content_type: application/x-tar
