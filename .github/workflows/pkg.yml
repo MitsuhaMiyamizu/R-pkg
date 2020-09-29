@@ -121,14 +121,18 @@ jobs:
           #mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
           ls -al /home/runner/work/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
+          export RELEASE_TAG=$(git tag -l)
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
+        run: |
+          cd /home/runner/work/R-pkg/R-pkg/
+          export RELEASE_TAG=$(git tag -l)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }} Packages built for Ubuntu Bionic
+          release_name: Version ${{ RELEASE_TAG }} built for Ubuntu Bionic
           draft: false
           prerelease: false
       - name: Upload Release Asset
