@@ -6,7 +6,7 @@ on:
     branches: [ master ]
 jobs:
   build:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup env
         uses: actions/checkout@v2
@@ -63,6 +63,7 @@ jobs:
           wget "https://cran.r-project.org/src/base/R-4/R-4.0.2.tar.gz" -q
           tar zxf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
           cd R-4.0.2/
+          sed -i '/^#undef HAVE_MATHERR/d' src/include/config.h.in
           ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc/R --datarootdir=/usr/share rsharedir=/usr/share/R/ rincludedir=/usr/include/R/ rdocdir=/usr/share/doc/R/ --with-x --enable-R-shlib --with-blas="$MKL" --with-lapack --disable-R-profiling --with-tcltk
       - name: Compile R
         run: |
@@ -88,8 +89,6 @@ jobs:
           source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
-          cd /home/runner/work/R-pkg/ && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
-          mv R-4.0.2.tar.zst /home/runner/work/R-pkg/R-pkg/
       - name: Install & Benchmark
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
@@ -118,9 +117,9 @@ jobs:
           cd /home/runner/work/R-pkg/R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
-          #Rscript pkg.R
-          #cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
-          #mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
+          Rscript pkg.R
+          cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
+          mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
           ls -al /home/runner/work/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
       - name: Create Release
@@ -129,8 +128,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: /[0-9]*.0.bionic/
+          release_name: Packages built for Ubuntu Bionic
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -140,6 +139,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: ./
-          asset_name: R-4.0.2.tar.zst
+          asset_path: /home/runner/work/R-pkg/R-pkg/
+          asset_name: pkg.tar.zst
           #asset_content_type: application/
