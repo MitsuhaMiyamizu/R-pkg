@@ -10,13 +10,12 @@ jobs:
     steps:
       - name: Setup env
         uses: actions/checkout@v2
-      - name: Upgrade the system
-        run: sudo apt-get -qq update && sudo apt-get -qq upgrade && sudo apt-get -qq install zstd -y
       - name: Download toolchain
         env:
           iccdl: ${{ secrets.ICCDLADDR }}
           icctar: ${{ secrets.ICCTARBALL }}
         run: |
+          sudo apt-get -qq install zstd
           cd /home/runner/work/R-pkg/
           wget ${iccdl} -q
           tar -I zstd -xf ${icctar}
