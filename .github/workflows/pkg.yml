@@ -128,8 +128,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Packages Version ${{ github.ref }} built for Ubuntu Bionic
+          tag_name: 1.0
+          release_name: Packages Version 1.0 built for Ubuntu Bionic
           draft: false
           prerelease: false
       - name: Upload Release Asset
