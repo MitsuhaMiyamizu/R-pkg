@@ -53,7 +53,7 @@ script:
   - export LD="xild"
   - export LD_LIBRARY_PATH=/home/travis/build/MitsuhaMiyamizu/R-MKL/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
   - source /home/travis/build/MitsuhaMiyamizu/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
-  - wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2_icc_ifort_mkl_xenial/R-4.0.2.tar.zst" -q
+  - wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/1.0.xenial/R-4.0.2.tar.zst" -q
   - tar -I zstd -xf R-4.0.2.tar.zst && rm R-4.0.2.tar.zst
   - cd R-4.0.2/
   - sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
