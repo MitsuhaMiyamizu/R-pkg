@@ -10,19 +10,22 @@ jobs:
     steps:
       - name: Setup env
         uses: actions/checkout@v2
+      - name: Upgrade the system
+        run: sudo apt-get -qq update && sudo apt-get -qq upgrade -y && sudo apt-get -qq install zstd -y
       - name: Download toolchain
         env:
           iccdl: ${{ secrets.ICCDLADDR }}
+          icctar: ${{ secrets.ICCTARBALL }}
         run: |
           cd /home/runner/work/R-pkg/
           wget ${iccdl} -q
-          tar xzf intel.tar.gz
-          rm intel.tar.gz
+          tar -I zstd -xf ${icctar}
+          rm ${icctar}
       - name: Install dependencies
         run: sudo apt-get -qq update
       - name: Install dependencies 1
         run: |
-          sudo apt-get install subversion ccache texlive texlive-fonts-extra texlive-latex-extra libx11-dev libpcre2-dev libjpeg-dev libpng-dev libtiff-dev libxmu-dev libxt-dev libreadline-dev
+          sudo apt-get -qq install subversion ccache texlive texlive-fonts-extra texlive-latex-extra libx11-dev libpcre2-dev libjpeg-dev libpng-dev libtiff-dev libxmu-dev libxt-dev libreadline-dev
           curl https://repogen.simplylinux.ch/txt/xenial/sources_8e2c2611bccddbabe97e129f805006bdfd8ee22b.txt | sudo tee /etc/apt/sources.list
           sudo apt-get -qq update
           sudo apt-get -qq build-dep r-base -y
