@@ -86,6 +86,8 @@ jobs:
           source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
+          cd .. && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
+          mv R-4.0.2.tar.zst ./R-pkg/
       - name: Install & Benchmark
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
@@ -114,9 +116,9 @@ jobs:
           cd /home/runner/work/R-pkg/R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
-          Rscript pkg.R
-          cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
-          mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
+          #Rscript pkg.R
+          #cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
+          #mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
           ls -al /home/runner/work/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
       - name: Create Release
@@ -125,7 +127,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: /[0-9]*.0.bionic/
+          tag_name: 1.0
           release_name: Packages built for Ubuntu Bionic
           draft: false
           prerelease: false
@@ -137,5 +139,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: /home/runner/work/R-pkg/R-pkg/
-          asset_name: pkg.tar.zst
+          asset_name: R-4.0.2.tar.zst
           #asset_content_type: application/
