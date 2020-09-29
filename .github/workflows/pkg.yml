@@ -20,7 +20,7 @@ jobs:
           wget ${iccdl} -q
           tar -I zstd -xf ${icctar}
           rm ${icctar}
-      - name: Install dependencies 1
+      - name: Install Building Dependencies for R-base
         run: |
           sudo apt-get install subversion ccache texlive texlive-fonts-extra texlive-latex-extra libx11-dev libpcre2-dev libjpeg-dev libpng-dev libtiff-dev libxmu-dev libxt-dev libreadline-dev -y
           curl https://repogen.simplylinux.ch/txt/bionic/sources_dd16190d58c2ce272cf1b15983db2daaa096d075.txt | sudo tee /etc/apt/sources.list
@@ -30,11 +30,11 @@ jobs:
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
           sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-      - name: Install intel mkl library
+      - name: Install Intel MKL
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install intel-mkl-2020.3-111 -y
-      - name: Prepare R source tarball
+      - name: Prepare R Source
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
           export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
@@ -86,9 +86,7 @@ jobs:
           source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-4.0.2/
           make
-          cd .. && tar -I zstd -cf R-4.0.2.tar.zst R-4.0.2/
-          mv R-4.0.2.tar.zst ./R-pkg/
-      - name: Install & Benchmark
+      - name: Install & Build Packages
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
           export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
@@ -116,17 +114,15 @@ jobs:
           cd /home/runner/work/R-pkg/R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
-          #Rscript pkg.R
-          #cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
-          #mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
-          ls -al /home/runner/work/R-pkg/
+          Rscript pkg.R
+          cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
+          mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
-          export RELEASE_TAG=$(git tag -l)
-      - name: Upload binaries to release
+      - name: Upload Binaries to Release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: /home/runner/work/R-pkg/R-pkg/R-4.0.2.tar.zst
+          file: /home/runner/work/R-pkg/R-pkg/pkg.tar.zst
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
