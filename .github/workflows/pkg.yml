@@ -122,23 +122,11 @@ jobs:
           ls -al /home/runner/work/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
           export RELEASE_TAG=$(git tag -l)
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          tag_name: 1.0
-          release_name: Packages Version 1.0 built for Ubuntu Bionic
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: /home/runner/work/R-pkg/R-pkg/R-4.0.2.tar.zst
-          asset_name: R-4.0.2.tar.zst
-          asset_content_type: application/x-tar
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /home/runner/work/R-pkg/R-pkg/R-4.0.2.tar.zst
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
