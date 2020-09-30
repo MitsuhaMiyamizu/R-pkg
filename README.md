@@ -1,5 +1,5 @@
 # R-pkg
-R packages built with Intel C/C++/Fortran Compiler with Math Kernel Library.
+R packages built with the latest Intel C/C++/Fortran Compiler with Intel Math Kernel Library.
 
 # Build Status
 
