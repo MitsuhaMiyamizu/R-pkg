@@ -3,7 +3,6 @@ R packages built with the latest Intel C/C++/Fortran Compiler with Intel Math Ke
 
 # Build Status
 
-[![Build Status](https://travis-ci.org/MitsuhaMiyamizu/R-pkg.svg)](https://travis-ci.org/MitsuhaMiyamizu/R-pkg)
 [![Build Status](https://github.com/MitsuhaMiyamizu/R-pkg/workflows/pkg/badge.svg)](https://github.com/MitsuhaMiyamizu/R-pkg/actions?query=workflow%3Apkg)
 
 # Currently Built Packages
