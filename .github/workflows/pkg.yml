@@ -3,10 +3,10 @@ on:
   push:
     branches: [ dev ]
   pull_request:
-    branches: [ master ]
+    branches: [ dev ]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
       - name: Setup env
         uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
       - name: Install Building Dependencies for R-base
         run: |
           sudo apt-get install subversion ccache texlive texlive-fonts-extra texlive-latex-extra libx11-dev libpcre2-dev libjpeg-dev libpng-dev libtiff-dev libxmu-dev libxt-dev libreadline-dev -y
-          curl https://repogen.simplylinux.ch/txt/bionic/sources_dd16190d58c2ce272cf1b15983db2daaa096d075.txt | sudo tee /etc/apt/sources.list
+          curl https://repogen.simplylinux.ch/txt/xenial/sources_806a0b140939fc6715a1303545ba86ee3f40492c.txt | sudo tee /etc/apt/sources.list
           sudo apt-get -qq update
           sudo apt-get -qq build-dep r-base -y
           cd /home/runner/work/R-pkg/
@@ -36,56 +36,9 @@ jobs:
           sudo apt-get -qq install intel-mkl-2020.3-111 -y
       - name: Prepare R Source
         run: |
-          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
-          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
-          source /opt/intel/mkl/bin/mklvars.sh intel64
-          export _intel_arch=intel64
-          export _intel_lib=mkl_intel_lp64
-          export MKL="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
-          export _intel_cc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
-          export LDFLAGS="-qopenmp"
-          export CFLAGS="${_intel_cc_opt}"
-          export CXXFLAGS="${_intel_cc_opt}"
-          export FFLAGS="${_intel_cc_opt}"
-          export FCFLAGS="${_intel_cc_opt}"
-          export CC="icc"
-          export CXX="icpc"
-          export F77="ifort"
-          export FC="ifort"
-          export AR="xiar"
-          export LD="xild"
-          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
-          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/
-          wget "https://cran.r-project.org/src/base/R-4/R-4.0.2.tar.gz" -q
-          tar zxf R-4.0.2.tar.gz && rm R-4.0.2.tar.gz
-          cd R-4.0.2/
-          sed -i '/^#undef HAVE_MATHERR/d' src/include/config.h.in
-          ./configure --prefix=/usr --libdir=/usr/lib --sysconfdir=/etc/R --datarootdir=/usr/share rsharedir=/usr/share/R/ rincludedir=/usr/include/R/ rdocdir=/usr/share/doc/R/ --with-x --enable-R-shlib --with-blas="$MKL" --with-lapack --disable-R-profiling --with-tcltk
-      - name: Compile R
-        run: |
-          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
-          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
-          source /opt/intel/mkl/bin/mklvars.sh intel64
-          export _intel_arch=intel64
-          export _intel_lib=mkl_intel_lp64
-          export MKL="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
-          export _intel_cc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
-          export LDFLAGS="-qopenmp"
-          export CFLAGS="${_intel_cc_opt}"
-          export CXXFLAGS="${_intel_cc_opt}"
-          export FFLAGS="${_intel_cc_opt}"
-          export FCFLAGS="${_intel_cc_opt}"
-          export CC="icc"
-          export CXX="icpc"
-          export F77="ifort"
-          export FC="ifort"
-          export AR="xiar"
-          export LD="xild"
-          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
-          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
-          cd /home/runner/work/R-pkg/R-4.0.2/
-          make
+          wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2.xenial/R.tar.zst" -q
+          tar -I zstd -xf R-4.0.2.tar.zst && rm R-4.0.2.tar.zst
       - name: Install & Build Packages
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
@@ -115,6 +68,11 @@ jobs:
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
+          Rscript bench-25.R
+          Rscript dgemm.R
+          Rscript multitest.R
+          Rscript parallel.R
+          Rscript R-benchmark.R
           cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
           mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
@@ -123,6 +81,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: /home/runner/work/R-pkg/R-pkg/pkg.tar.zst
-          tag: ${{ github.ref }}
+          tag: v4.0.2.pkg.xenial
           overwrite: true
           file_glob: true
