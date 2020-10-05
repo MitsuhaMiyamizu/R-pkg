@@ -38,7 +38,7 @@ jobs:
         run: |
           cd /home/runner/work/R-pkg/
           wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2.xenial/R.tar.zst" -q
-          tar -I zstd -xf R-4.0.2.tar.zst && rm R-4.0.2.tar.zst
+          tar -I zstd -xf R.tar.zst && rm R.tar.zst
       - name: Install & Build Packages
         run: |
           export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
