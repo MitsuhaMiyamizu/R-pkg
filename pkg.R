@@ -1,4 +1,4 @@
-.libPaths('/home/runner/work/R-pkg/R/library/')
+.libPaths('/home/runner/work/R-MKL/R/library/')
 repos <- 'https://cloud.r-project.org/'
 install.packages("foreach", repos = repos)
 install.packages("SuppDists", repos = repos)

@@ -1,4 +1,4 @@
-.libPaths('/home/runner/work/R-pkg/R/library/')
+.libPaths('/home/runner/work/R-MKL/R/library/')
 library("foreach")
 library("doParallel")
 
