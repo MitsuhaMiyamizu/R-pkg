@@ -1,4 +1,4 @@
-name: pkg
+name: pkg-bionic
 on:
   push:
     branches: [ master ]
