@@ -16,7 +16,8 @@ jobs:
           icctar: ${{ secrets.ICCTARBALL }}
         run: |
           sudo apt-get -qq install zstd
-          cd /home/runner/work/R-pkg/
+          mkdir /home/runner/work/R-MKL/
+          cd /home/runner/work/R-MKL/
           wget ${iccdl} -q
           tar -I zstd -xf ${icctar}
           rm ${icctar}
@@ -26,26 +27,26 @@ jobs:
           curl https://repogen.simplylinux.ch/txt/bionic/sources_dd16190d58c2ce272cf1b15983db2daaa096d075.txt | sudo tee /etc/apt/sources.list
           sudo apt-get -qq update
           sudo apt-get -qq build-dep r-base -y
-          cd /home/runner/work/R-pkg/
+          cd /home/runner/work/R-MKL/
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
           sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-      - name: Install intel mkl library
+      - name: Install Intel MKL Library
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install intel-mkl-2020.3-111 -y
       - name: Prepare R source tarball
         run: |
-          cd /home/runner/work/R-pkg/
+          cd /home/runner/work/R-MKL/
           wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2.bionic/R.tar.zst" -q
       - name: Decompress R
         run: |
-          cd /home/runner/work/R-pkg/ && tar -I zstd -xf R.tar.zst
+          cd /home/runner/work/R-MKL/ && tar -I zstd -xf R.tar.zst
           rm R.tar.zst
       - name: Install & Benchmark
         run: |
-          export PATH=/home/runner/work/R-pkg/intel/bin/:$PATH
-          export INTEL_LICENSE_FILE=/home/runner/work/R-pkg/intel
+          export PATH=/home/runner/work/R-MKL/intel/bin/:$PATH
+          export INTEL_LICENSE_FILE=/home/runner/work/R-MKL/intel
           source /opt/intel/mkl/bin/mklvars.sh intel64
           export _intel_arch=intel64
           export _intel_lib=mkl_intel_lp64
@@ -62,18 +63,17 @@ jobs:
           export FC="ifort"
           export AR="xiar"
           export LD="xild"
-          export LD_LIBRARY_PATH=/home/runner/work/R-pkg/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
-          source /home/runner/work/R-pkg/intel/bin/compilervars.sh ${_intel_arch}
-          cd /home/runner/work/R-pkg/R-4.0.2/
-          mkdir /home/runner/work/R-pkg/R/
-          mkdir /home/runner/work/R-pkg/R/library/
-          cd /home/runner/work/R-pkg/R-4.0.2/
+          export LD_LIBRARY_PATH=/home/runner/work/R-MKL/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
+          source /home/runner/work/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
+          cd /home/runner/work/R-MKL/R-4.0.2/
+          mkdir /home/runner/work/R-MKL/R/
+          mkdir /home/runner/work/R-MKL/R/library/
+          cd /home/runner/work/R-MKL/R-4.0.2/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
-          cd /home/runner/work/R-pkg/ && tar -I zstd -cf pkg.tar.zst R/
+          cd /home/runner/work/R-MKL/ && tar -I zstd -cf pkg.tar.zst R/
           mv pkg.tar.zst /home/runner/work/R-pkg/R-pkg/
-          ls -al /home/runner/work/R-pkg/
           cd /home/runner/work/R-pkg/R-pkg/
           export RELEASE_TAG=$(git tag -l)
       - name: Upload Binaries to Release
