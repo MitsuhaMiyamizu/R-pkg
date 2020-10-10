@@ -37,4 +37,3 @@ R packages built with the latest Intel C/C++/Fortran Compiler with Intel Math Ke
 |affy|
 |knitr|
 |remotes|
-|torch|

@@ -38,8 +38,8 @@ jobs:
       - name: Prepare R Source
         run: |
           cd /home/runner/work/R-MKL/
-          wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2.xenial/R.tar.zst" -q
-          tar -I zstd -xf R.tar.zst && rm R.tar.zst
+          wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.3.xenial/R-4.0.3-mkl.tar.zst" -q
+          tar -I zstd -xf R-4.0.3-mkl.tar.zst && rm R-4.0.3-mkl.tar.zst
       - name: Install & Build Packages
         run: |
           export PATH=/home/runner/work/R-MKL/intel/bin/:$PATH
@@ -62,11 +62,33 @@ jobs:
           export LD="xild"
           export LD_LIBRARY_PATH=/home/runner/work/R-MKL/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
           source /home/runner/work/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
-          cd /home/runner/work/R-MKL/R-4.0.2/
+          cd /home/runner/work/R-MKL/R-4.0.3/
           mkdir /home/runner/work/R-MKL/R/
           mkdir /home/runner/work/R-MKL/R/library/
-          cd /home/runner/work/R-MKL/R-4.0.2/
+          cd /home/runner/work/R-MKL/R-4.0.3/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
+      - name: Running Benchmark and Build Packages
+        run: |
+          export PATH=/home/runner/work/R-MKL/intel/bin/:$PATH
+          export INTEL_LICENSE_FILE=/home/runner/work/R-MKL/intel
+          source /opt/intel/mkl/bin/mklvars.sh intel64
+          export _intel_arch=intel64
+          export _intel_lib=mkl_intel_lp64
+          export MKL="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_rt -lpthread -lm -ldl"
+          export _intel_cc_opt="-O3 -fPIC -m64 -march=native -fp-model precise -fp-model source -I${MKLROOT}/include"
+          export LDFLAGS="-qopenmp"
+          export CFLAGS="${_intel_cc_opt}"
+          export CXXFLAGS="${_intel_cc_opt}"
+          export FFLAGS="${_intel_cc_opt}"
+          export FCFLAGS="${_intel_cc_opt}"
+          export CC="icc"
+          export CXX="icpc"
+          export F77="ifort"
+          export FC="ifort"
+          export AR="xiar"
+          export LD="xild"
+          export LD_LIBRARY_PATH=/home/runner/work/R-MKL/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
+          source /home/runner/work/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
           cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
           Rscript bench-25.R
@@ -82,6 +104,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: /home/runner/work/R-pkg/R-pkg/pkg.tar.zst
-          tag: v4.0.2.pkg.xenial
+          tag: v4.0.3.pkg.xenial
           overwrite: true
           file_glob: true
