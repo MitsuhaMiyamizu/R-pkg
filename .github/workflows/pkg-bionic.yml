@@ -38,11 +38,11 @@ jobs:
       - name: Prepare R source tarball
         run: |
           cd /home/runner/work/R-MKL/
-          wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.2.bionic/R.tar.zst" -q
+          wget "https://github.com/MitsuhaMiyamizu/R-MKL/releases/download/v4.0.3.bionic/R-4.0.3.tar.zst" -q
       - name: Decompress R
         run: |
-          cd /home/runner/work/R-MKL/ && tar -I zstd -xf R.tar.zst
-          rm R.tar.zst
+          cd /home/runner/work/R-MKL/ && tar -I zstd -xf R-4.0.3.tar.zst
+          rm R-4.0.3.tar.zst
       - name: Install & Benchmark
         run: |
           export PATH=/home/runner/work/R-MKL/intel/bin/:$PATH
@@ -65,10 +65,10 @@ jobs:
           export LD="xild"
           export LD_LIBRARY_PATH=/home/runner/work/R-MKL/intel/compilers_and_libraries_2020.3.275/linux/compiler/lib/intel64_lin/
           source /home/runner/work/R-MKL/intel/bin/compilervars.sh ${_intel_arch}
-          cd /home/runner/work/R-MKL/R-4.0.2/
+          cd /home/runner/work/R-MKL/R-4.0.3/
           mkdir /home/runner/work/R-MKL/R/
           mkdir /home/runner/work/R-MKL/R/library/
-          cd /home/runner/work/R-MKL/R-4.0.2/
+          cd /home/runner/work/R-MKL/R-4.0.3/
           sudo -E env "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" env "PATH=$PATH" make install
           cd /home/runner/work/R-pkg/R-pkg/
           Rscript pkg.R
@@ -81,6 +81,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: /home/runner/work/R-pkg/R-pkg/pkg.tar.zst
-          tag: v4.0.2.pkg.bionic
+          tag: v4.0.3.pkg.bionic
           overwrite: true
           file_glob: true
